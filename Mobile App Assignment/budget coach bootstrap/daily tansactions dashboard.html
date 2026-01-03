@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard - Daily Transactions</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- css part -->
+<style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        font-family: Arial, sans-serif;color: #ffffff;
+        background: #ffffff
+    }
+
+    /* Top Card */
+    .top-card {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #375534;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+    }
+
+    .date-slider {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .transactions-list {
+        overflow-y: auto;
+        max-height: calc(100vh - 180px); 
+        padding: 0 1rem;
+    }
+
+    .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #ddd;
+        
+    }
+
+    .transaction-item.income {
+        color: #46b446;
+    }
+    .transaction-item.expense {
+        color: #aa0606;
+    }
+
+     .title {
+    margin: 0;
+    font-weight: 600;
+    text-align: center -;
+    }
+
+
+    /* Floating add button */
+    .add-transaction-btn {
+        position: fixed;
+        bottom: 70px; /* above bottom nav */
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #375534;
+        color: white;
+        font-size: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 12px #00000033;
+        backdrop-filter: blur(6px);
+        z-index: 12;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .add-transaction-btn:hover {
+        transform: scale(1.1);
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 60px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background: #375534;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+        z-index: 11;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+
+   
+    .bottom-nav button.active::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: #ffffff;
+        border-radius: 2px;
+        animation: slideIn 0.3s ease forwards;
+    }
+
+    .bottom-nav button {
+    background: transparent; 
+    border: none;
+    padding: 6px;
+    position: relative;
+}
+    .bottom-nav img {
+    background: transparent;
+    display: block;
+    margin: 0 auto;
+    }
+
+   
+    @keyframes slideIn {
+        from { width: 0; }
+        to { width: 100%; }
+    }
+
+    .date-input {
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-weight: 500;
+    cursor: pointer;
+    color: #ffffff;
+    }
+
+/* Sidebar Buttons */
+.sidebar-btn {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 0;
+    text-align: left;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    color: inherit;
+    width: 100%;
+}
+
+.sidebar-btn:hover {
+    background: #e6e6e6;
+    color: #000000;
+}    
+    
+
+
+</style>
+</head>
+
+<!-- html part -->
+<body>
+
+<!-- Side Panel -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidePanel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Menu</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body d-flex flex-column justify-content-between p-0">
+    <!-- list of items  -->
+    <ul class="list-group list-group-flush">
+  <li class="list-group-item">
+    <button class="sidebar-btn w-100" onclick="goToPage('dashboard.html')">Dashboard</button>
+  </li>
+  <li class="list-group-item">
+    <button class="sidebar-btn w-100" onclick="goToPage('profile.html')">Profile</button>
+  </li>
+  <li class="list-group-item">
+    <button class="sidebar-btn w-100" onclick="goToPage('change-password.html')">Change Password</button>
+  </li>
+  <li class="list-group-item">
+    <button class="sidebar-btn w-100" onclick="goToPage('settings.html')">Settings</button>
+  </li>
+</ul>
+
+    <!-- Logout at Bottom -->
+    <div class="p-3">
+      <button class="btn w-100 btn-outline-danger logout-btn">Logout</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Top Card -->
+<div class="top-card">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="title">TRANSACTIONS</h5>
+        <button 
+            class="btn btn-sm btn-outline-secondary"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#sidePanel"
+            style="background-color: white;">
+             &#9776;
+        </button>
+    </div>
+
+    <div class="date-slider mt-2">
+        <button class="btn btn-sm btn-light" id="prevDate">&lt;</button>
+
+        <input 
+            type="date"
+            id="datePicker"
+            class="date-input"
+            
+        >
+
+    <button class="btn btn-sm btn-light" id="nextDate">&gt;</button>
+</div>
+    <div>
+        <p>Total Incomes: 0.00 LKR</p>
+        <p>Total Expenses: 0.00 LKR</p>
+    </div>
+</div>
+
+<!-- Transactions List -->
+<div class="transactions-list" id="transactions-list">
+   
+</div>
+
+<!-- Floating Add Button -->
+<div class="add-transaction-btn">+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+    <button class="active" >
+        <img src="assets\Icons\Bottom Nav Bar\trans.png" style="background-color: transparent;" width="24">
+    </button>
+    <button >
+        <img src="assets\Icons\Bottom Nav Bar\event.png" style="background-color: transparent;" width="24">
+    </button>
+    <button >
+        <img src="assets\Icons\Bottom Nav Bar\acc.png" style="background-color: transparent;" width="24">
+    </button>
+    <button >
+        <img src="assets\Icons\Bottom Nav Bar\stat.png" style="background-color: transparent;" width="24">
+    </button>
+</div>
+
+<!-- javascrpit part -->
+
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+ <script>
+    /* nav bar clicking*/
+    const navButtons = document.querySelectorAll('.bottom-nav button');
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            navButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    /* login fake */
+    const loggedIn = true; 
+    if(!loggedIn) {
+        window.location.href = 'index.html'; 
+    }
+ </script>
+
+ <script>
+    const datePicker = document.getElementById('datePicker');
+    const prevBtn = document.getElementById('prevDate');
+    const nextBtn = document.getElementById('nextDate');
+
+    // Set today's date on load
+    const today = new Date();
+    datePicker.valueAsDate = today;
+
+    // Previous day
+    prevBtn.addEventListener('click', () => {
+        const current = new Date(datePicker.value);
+        current.setDate(current.getDate() - 1);
+        datePicker.valueAsDate = current;
+        onDateChange();
+    });
+
+    // Next day
+    nextBtn.addEventListener('click', () => {
+        const current = new Date(datePicker.value);
+        current.setDate(current.getDate() + 1);
+        datePicker.valueAsDate = current;
+        onDateChange();
+    });
+
+    // Calendar change
+    datePicker.addEventListener('change', onDateChange);
+
+    function onDateChange() {
+        console.log("Selected date:", datePicker.value);
+        // Later you can load transactions for this date
+    }
+ </script>
+
+ <script>
+function goToPage(page) {
+    // Temporary: just log the page for now
+    console.log("Redirect to:", page);
+    
+    // Uncomment this line when pages exist
+    // window.location.href = page;
+}
+</script>
+
+<script>
+const logoutBtn = document.getElementById('logoutBtn');
+
+logoutBtn.addEventListener('click', () => {
+    // 1. Clear login info (if stored in localStorage/sessionStorage)
+    localStorage.removeItem('loggedIn'); // or whatever key you used
+    sessionStorage.removeItem('loggedIn');
+
+    // 2. Redirect to login page
+    window.location.href = 'index.html'; // change this to your login page
+});
+</script>
+
+</body>
+</html>
