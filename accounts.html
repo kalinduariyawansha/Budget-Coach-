@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Accounts</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        color: #333;
+        background: #ffffff
+    }
+
+    /* Top Card */
+    .top-card {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #375534;
+        padding: 1rem;
+        box-shadow: 0 2px 4px #0000001a;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        color: white;
+    }
+
+    .title {
+        margin: 0;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    /* Accounts List */
+    .accounts-container {
+        overflow-y: auto;
+        max-height: calc(100vh - 180px);
+        padding: 1rem;
+    }
+
+    .account-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+    .account-item.green {
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+    }
+
+    .account-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .account-balance {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    /* Floating add button */
+    .add-account-btn {
+        position: fixed;
+        bottom: 70px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #375534;
+        color: white;
+        font-size: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 12px #00000033;
+        backdrop-filter: blur(6px);
+        z-index: 30;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+        border: none;
+    }
+    .add-account-btn:hover {
+        transform: scale(1.1);
+    }
+    .add-account-btn.active {
+        background: #ff0000;
+        transform: rotate(45deg) scale(1.1);
+    }
+
+    /* Overlay & Popup */
+    #addCardOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0);
+        backdrop-filter: blur(0px);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 80px;
+        pointer-events: none;
+        transition: background 0.3s, backdrop-filter 0.3s;
+        z-index: 20;
+    }
+    #addCardOverlay.active {
+        background: rgba(0,0,0,0.4d);
+        backdrop-filter: blur(4px);
+        pointer-events: auto;
+    }
+    #addCard {
+        background: rgba(255,255,255,0.95);
+        padding: 1.5rem;
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        width: 90%;
+        max-width: 400px;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: opacity 0.3s, transform 0.3s;
+    }
+    #addCardOverlay.active #addCard {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Bottom nav */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 60px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background: #375534;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+        z-index: 11;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+    .bottom-nav button {
+        background: transparent;
+        border: none;
+        padding: 6px;
+    }
+    .bottom-nav button.active::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: #ffffff;
+        border-radius: 2px;
+    }
+    .bottom-nav img {
+        filter: brightness(0) invert(1);
+        width: 24px;
+    }
+
+    /* Side panel (optional) */
+    .sidebar-btn {
+        background: transparent;
+        border: none;
+        padding: 0.5rem 0;
+        text-align: left;
+        font-size: 1rem;
+        cursor: pointer;
+        color: inherit;
+        width: 100%;
+    }
+    .sidebar-btn:hover {
+        background: #e6e6e6;
+    }
+</style>
+</head>
+<body>
+
+<!-- Side Panel (matching dashboard) -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidePanel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Menu</h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column justify-content-between p-0">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('dashboard.html')">Dashboard</button></li>
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('profile.html')">Profile</button></li>
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('change-password.html')">Change Password</button></li>
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('settings.html')">Settings</button></li>
+    </ul>
+    <div class="p-3">
+      <button class="btn w-100 btn-outline-danger logout-btn">Logout</button>
+    </div>
+  </div>
+</div>
+
+<!-- Top Card -->
+<div class="top-card">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <button class="btn btn-sm btn-outline-light" data-bs-toggle="offcanvas" data-bs-target="#sidePanel">☰</button>
+        <h6 class="m-0 flex-grow-1 text-center title">ACCOUNTS</h6>
+        <div style="width:32px"></div>
+    </div>
+</div>
+
+<!-- Accounts List -->
+<div class="accounts-container" id="accounts-list">
+    <!-- Dynamic accounts appear here -->
+</div>
+
+<!-- Floating Add Button -->
+<button class="add-account-btn" id="addBtn">+</button>
+
+<!-- Create Account Popup -->
+<div id="addCardOverlay">
+    <div id="addCard">
+        <h5 class="mb-4 text-center fw-bold">CREATE ACCOUNT</h5>
+        
+        <!-- Account Name -->
+        <div class="mb-3">
+            <label for="accountName" class="form-label fw-medium">Account Name</label>
+            <input type="text" id="accountName" class="form-control" placeholder="e.g. Savings Account">
+        </div>
+
+        <!-- Account Type -->
+        <div class="mb-3">
+            <label for="accountType" class="form-label fw-medium">Account Type</label>
+            <select id="accountType" class="form-select">
+                <option value="savings">Savings</option>
+                <option value="current">Current</option>
+                <option value="card">Card</option>
+            </select>
+        </div>
+
+        <!-- Balance + Currency -->
+        <div class="mb-3">
+            <label for="accountBalance" class="form-label fw-medium">Balance</label>
+            <div class="input-group">
+                <input type="number" id="accountBalance" class="form-control" placeholder="0.00">
+                <select id="currency" class="form-select" style="max-width:80px">
+                    <option value="LKR">LKR</option>
+                    <option value="$">$</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+            <label for="description" class="form-label fw-medium">Description</label>
+            <textarea id="description" class="form-control" rows="2" placeholder="Optional description..."></textarea>
+        </div>
+
+        <!-- Buttons -->
+        <button id="saveAccount" class="btn btn-success w-100 mb-2 fw-medium">SAVE</button>
+        <div class="text-end">
+            <button id="closeBtn" class="btn btn-outline-secondary px-4">CANCEL</button>
+        </div>
+    </div>
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+    <button onclick="goToPage('daily tansactions dashboard.html')">
+        <img src="assets/Icons/Bottom Nav Bar/trans.png" width="24">
+    </button>
+    <button onclick="goToPage('events.html')">
+        <img src="assets/Icons/Bottom Nav Bar/event.png" width="24">
+    </button>
+    <button class="active">
+        <img src="assets/Icons/Bottom Nav Bar/acc.png" width="24">
+    </button>
+    <button onclick="goToPage('stats.html')">
+        <img src="assets/Icons/Bottom Nav Bar/stat.png" width="24">
+    </button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Accounts data
+    let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+
+    // Elements
+    const addBtn = document.getElementById('addBtn');
+    const overlay = document.getElementById('addCardOverlay');
+    const saveBtn = document.getElementById('saveAccount');
+    const closeBtn = document.getElementById('closeBtn');
+    const accountsList = document.getElementById('accounts-list');
+
+    // Toggle popup
+    addBtn.addEventListener('click', () => {
+        overlay.classList.toggle('active');
+        addBtn.classList.toggle('active');
+    });
+
+    // Close on overlay click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.classList.remove('active');
+            addBtn.classList.remove('active');
+            resetForm();
+        }
+    });
+
+    closeBtn.addEventListener('click', () => {
+        overlay.classList.remove('active');
+        addBtn.classList.remove('active');
+        resetForm();
+    });
+
+    // Save account
+    saveBtn.addEventListener('click', () => {
+    const name = document.getElementById('accountName').value.trim();
+    const type = document.getElementById('accountType').value;
+    const balanceInput = document.getElementById('accountBalance').value;
+    const balance = parseFloat(balanceInput) || 0;
+    const currency = document.getElementById('currency').value;
+    const desc = document.getElementById('description').value.trim();
+
+    if (!name || balanceInput === '' || isNaN(balance)) {
+        alert('Please enter account name and valid balance');
+        return;
+    }
+
+    const account = { name, type, balance, currency, desc };
+    
+    if (window.editingIndex !== undefined) {
+        accounts[window.editingIndex] = account;
+        delete window.editingIndex;
+    } else {
+        accounts.push(account);
+    }
+    
+    localStorage.setItem('accounts', JSON.stringify(accounts));
+    renderAccounts();
+    overlay.classList.remove('active');
+    addBtn.classList.remove('active');
+    resetForm();
+});
+
+
+    function handleEdit(e) {
+    e.preventDefault();
+    const index = parseInt(e.target.dataset.index);
+    const account = accounts[index];
+    
+    document.getElementById('accountName').value = account.name;
+    document.getElementById('accountType').value = account.type;
+    document.getElementById('accountBalance').value = account.balance;
+    document.getElementById('currency').value = account.currency;
+    document.getElementById('description').value = account.desc || '';
+    
+    overlay.classList.add('active');
+    addBtn.classList.add('active');
+    
+    window.editingIndex = index;
+}
+
+function handleDelete(e) {
+    e.preventDefault();
+    const index = parseInt(e.target.dataset.index);
+    if (confirm('Delete this account?')) {
+        accounts.splice(index, 1);
+        localStorage.setItem('accounts', JSON.stringify(accounts));
+        renderAccounts();
+    }
+}
+
+    
+    // Render accounts
+    function renderAccounts() {
+        accountsList.innerHTML = '';
+        accounts.forEach((account, index) => {
+            const item = document.createElement('div');
+            item.className = 'account-item green';
+            item.innerHTML = `
+                <div style="flex: 1;">
+                    <div class="account-name">${account.name}</div>
+                    <small class="text-muted">${account.desc || account.type}</small>
+                </div>
+                <div class="text-end" style="min-width: 100px;">
+                    <div class="account-balance">${account.balance.toLocaleString()} ${account.currency}</div>
+                    <small>${account.type}</small>
+                </div>
+                <div class="dropdown ms-2">
+                    <button class="btn btn-sm btn-outline-secondary p-1" data-bs-toggle="dropdown">⋮</button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item edit-account" href="#" data-index="${index}">✏️ Edit</a></li>
+                        <li><a class="dropdown-item delete-account" href="#" data-index="${index}">🗑 Delete</a></li>
+                    </ul>
+                </div>
+            `;
+            accountsList.appendChild(item);
+        });
+
+    // Add event listeners AFTER rendering
+    document.querySelectorAll('.edit-account').forEach(btn => {
+        btn.addEventListener('click', handleEdit);
+    });
+    document.querySelectorAll('.delete-account').forEach(btn => {
+        btn.addEventListener('click', handleDelete);
+    });
+}
+
+
+    
+
+    function resetForm() {
+        document.getElementById('accountName').value = '';
+        document.getElementById('accountBalance').value = '';
+        document.getElementById('description').value = '';
+        document.getElementById('accountType').value = 'savings';
+        document.getElementById('currency').value = 'LKR';
+    }
+
+    function goToPage(page) {
+        window.location.href = page;
+    }
+
+    // Initial render
+    renderAccounts();
+</script>
+</body>
+</html>

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard - Daily Transactions</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- css part -->
+<style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        font-family: Arial, sans-serif;color: #ffffff;
+        background: #ffffff
+    }
+
+    /* Top Card */
+    .top-card {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #375534;
+        padding: 1rem;
+        box-shadow: 0 2px 4px #0000001a;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+    }
+
+   
+    .transactions-list {
+        overflow-y: auto;
+        max-height: calc(100vh - 180px); 
+        padding: 0 1rem;
+    }
+
+    .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #ddd;
+        
+    }
+
+    .transaction-item.income {
+        color: #46b446;
+    }
+    .transaction-item.expense {
+        color: #aa0606;
+    }
+
+     .title {
+    margin: 0;
+    font-weight: 600;
+    text-align: center -;
+    }
+
+
+    /* Floating add button */
+    .add-transaction-btn {
+        position: fixed;
+        bottom: 70px; /* above bottom nav */
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #375534;
+        color: white;
+        font-size: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 4px 12px #00000033;
+        backdrop-filter: blur(6px);
+        z-index: 12;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .add-transaction-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .add-popup-overlay {
+    position: fixed;
+    top
+    }
+
+     /* Overlay behind the card */
+#addCardOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #00000000; /* start transparent */
+    backdrop-filter: blur(0px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 80px; /* below navbar */
+    pointer-events: none;
+    transition: background 0.3s, backdrop-filter 0.3s;
+    z-index: 20; /* lower than button */
+}
+
+/* The popup card inside overlay */
+#addCard {
+    background: #ffffffcc;
+    padding: 1rem 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px #00000033;
+    width: 90%;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 25; /* below button but above overlay background */
+}
+
+#addCardOverlay.active {
+    background: #0000004d;
+    backdrop-filter: blur(4px);
+    pointer-events: auto;
+}
+
+#addCardOverlay.active #addCard {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Floating button */
+.add-transaction-btn {
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #375534;
+    color: #ffffff;
+    font-size: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 12px #00000033;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+    z-index: 30; /* ALWAYS above overlay and card */
+}
+
+.add-transaction-btn.active {
+    background: #ff0000;
+    transform: rotate(45deg) scale(1.1); /* + rotates to x */
+}
+
+
+    /* Bottom nav */
+    .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 60px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background: #375534;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+        z-index: 11;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+
+   
+    .bottom-nav button.active::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: #ffffff;
+        border-radius: 2px;
+        animation: slideIn 0.3s ease forwards;
+    }
+
+    .bottom-nav button {
+    background: transparent; 
+    border: none;
+    padding: 6px;
+    position: relative;
+}
+    .bottom-nav img {
+    background: transparent;
+    display: block;
+    margin: 0 auto;
+    }
+
+   
+    @keyframes slideIn {
+        from { width: 0; }
+        to { width: 100%; }
+    }
+
+    .date-input {
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-weight: 500;
+    cursor: pointer;
+    color: #ffffff;
+    }
+
+/* Sidebar Buttons */
+.sidebar-btn {
+    background: transparent;
+    border: none;
+    padding: 0.5rem 0;
+    text-align: left;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    color: inherit;
+    width: 100%;
+}
+
+.sidebar-btn:hover {
+    background: #e6e6e6;
+    color: #000000;
+}    
+
+/* Overlay behind the card */
+#addCardOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0);
+    backdrop-filter: blur(0px);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 80px; /* below navbar */
+    pointer-events: none;
+    transition: background 0.3s, backdrop-filter 0.3s;
+    z-index: 20; /* below button */
+}
+
+/* Popup card */
+#addCard {
+    background: rgba(255,255,255,0.8);
+    padding: 1rem 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 25;
+}
+
+#addCardOverlay.active {
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(4px);
+    pointer-events: auto;
+}
+
+#addCardOverlay.active #addCard {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Transaction Type Buttons */
+.type-btn {
+    flex: 1;
+    padding: 0.5rem 0;
+    margin: 0 3px;
+    border: 2px solid #ccc;
+    border-radius: 50px;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+    .type-btn:first-child { border-top-left-radius: 50px; border-bottom-left-radius: 50px; }
+    .type-btn:last-child { border-top-right-radius: 50px; border-bottom-right-radius: 50px; }
+
+    .type-btn[data-type="income"] { border-color: #46b446; color: #46b446; }
+    .type-btn[data-type="expense"] { border-color: #aa0606; color: #aa0606; }
+    .type-btn[data-type="transfer"] { border-color: #1e90ff; color: #1e90ff; }
+
+/* Transaction Type Button Active Colors */
+    .type-btn.active[data-type="income"] { background-color: #46b446; color: #fff; }
+    .type-btn.active[data-type="expense"] { background-color: #aa0606; color: #fff; }
+    .type-btn.active[data-type="transfer"] { background-color: #1e90ff; color: #fff; }
+
+/*ledger*/
+.ledger-container {
+    overflow-y: auto;
+    max-height: calc(100vh - 180px);
+    padding: 0 16px;
+    background: #ffffff;
+}
+
+.date-group {
+    margin-bottom: 12px;
+}
+
+.date-header {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    align-items: center;
+    background: 
+    #506856;
+    padding: 8px 10px;
+    border-radius: 10px 10px 0 0;
+    font-size: 14px;
+}
+
+.date-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.date-dot {
+    width: 8px;
+    height: 8px;
+    background: #46b446;
+    border-radius: 50%;
+}
+
+.date-text {
+    font-weight: 700;
+    color: #333;
+}
+
+.ledger-income {
+    text-align: right;
+    color: #46b446;
+    padding-right: 6px;
+}
+
+.ledger-expense {
+    text-align: left;
+    color: #aa0606;
+    padding-left: 6px;
+}
+
+.ledger-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr;
+    padding: 10px 6px;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+    font-size: 14px;
+}
+
+.ledger-title {
+    color: #333;
+}
+
+.ledger-income {
+    text-align: right;
+    color: #46b446;
+}
+
+.ledger-expense {
+    text-align: left;
+    color: #aa0606;
+}
+
+
+</style>
+</head>
+
+<!-- html part -->
+<body>
+
+<!-- Side Panel -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidePanel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Menu</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body d-flex flex-column justify-content-between p-0">
+    <!-- list of items  -->
+    <ul class="list-group list-group-flush">
+  <li class="list-group-item">
+    <button class="sidebar-btn w-100" onclick="goToPage('dashboard.html')">Dashboard</button>
+  </li>
+  <li class="list-group-item">
+    <button class="sidebar-btn w-100" onclick="goToPage('profile.html')">Profile</button>
+  </li>
+  <li class="list-group-item">
+    <button class="sidebar-btn w-100" onclick="goToPage('change-password.html')">Change Password</button>
+  </li>
+  <li class="list-group-item">
+    <button class="sidebar-btn w-100" onclick="goToPage('settings.html')">Settings</button>
+  </li>
+</ul>
+
+    <!-- Logout at Bottom -->
+    <div class="p-3">
+      <button class="btn w-100 btn-outline-danger logout-btn">Logout</button>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Top Card -->
+
+<!-- Top Card -->
+<div class="top-card">
+
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <button 
+            class="btn btn-sm btn-outline-light"
+            data-bs-toggle="offcanvas"
+            data-bs-target="#sidePanel">
+            &#9776;
+        </button>
+        <h6 class="m-0 text-center flex-grow-1">TRANSACTIONS</h6>
+        <div style="width:32px"></div>
+    </div>
+
+   
+    <div class="text-center mt-2">
+        <p class="mb-0">Total Incomes: 0.00 LKR</p>
+        <p class="mb-0">Total Expenses: 0.00 LKR</p>
+    </div>
+
+</div>
+
+  
+<!-- Transactions List -->
+<div class="ledger-container" id="transactions-list">
+   
+</div>
+
+
+
+<!-- Floating Add Button -->
+<div class="add-transaction-btn">+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+    <button class="active" >
+        <img src="assets\Icons\Bottom Nav Bar\trans.png" style="background-color: transparent;" width="24">
+    </button>
+    <button >
+        <img src="assets\Icons\Bottom Nav Bar\event.png" style="background-color: transparent;" width="24">
+    </button>
+   <button onclick="location.href='accounts.html'">
+        <img src="assets/Icons/Bottom Nav Bar/acc.png" style="background-color: transparent;" width="24">
+    </button>
+    <button >
+        <img src="assets\Icons\Bottom Nav Bar\stat.png" style="background-color: transparent;" width="24">
+    </button>
+</div>
+
+<!-- Add Transaction Overlay & Popup -->
+<div id="addCardOverlay">
+    <div id="addCard">
+        <h5 class="mb-3 text-center">Add Transaction</h5>
+
+       <!-- Transaction Type Buttons -->
+        <div class="d-flex justify-content-between mb-3">
+            <button class="type-btn" data-type="income" id="typeIncome">Income</button>
+            <button class="type-btn" data-type="expense" id="typeExpense">Expense</button>
+             <button class="type-btn" data-type="transfer" id="typeTransfer">Transfer</button>
+        </div>
+
+        <!-- Date Picker -->
+        <div class="mb-3">
+            <label for="transDate" class="form-label">Date</label>
+            <input type="date" id="transDate" class="form-control">
+        </div>
+
+         <!-- Transaction Name -->
+        <div class="mb-3">
+            <label for="transName" class="form-label">Transaction Name</label>
+            <input
+                type="text"
+                id="transName"
+                class="form-control"
+                placeholder="e.g. Lunch, Salary, Bus Fare"
+            >
+        </div>  
+
+        <!-- Amount & Currency -->
+        <div class="mb-3 d-flex">
+            <input type="number" id="transAmount" placeholder="Amount" class="form-control me-2">
+            <select id="currencyToggle" class="form-select w-auto">
+                <option value="LKR">LKR</option>
+                <option value="$">$</option>
+            </select>
+        </div>
+
+       
+        <!-- Category -->
+        <div class="mb-3">
+            <label for="categoryToggle" class="form-label">Category</label>
+            <select id="categoryToggle" class="form-select">
+                <option value="food">🍔 Food</option>
+                <option value="transport">🚌 Transport</option>
+                <option value="groceries">🛒 Groceries</option>
+                <option value="social">🎉 Social Life</option>
+                <option value="household">🏠 Household</option>
+                <option value="health">💊 Health</option>
+                <option value="education">📚 Education</option>
+                <option value="gift">🎁 Gift</option>
+                <option value="other">🔹 Other</option>
+            </select>
+        </div>
+
+        <!-- Account -->
+        <div class="mb-3">
+            <label for="accountToggle" class="form-label">Account</label>
+            <select id="accountToggle" class="form-select">
+                <option value="cash">Cash</option>
+                <option value="account01">Account 01</option>
+                <option value="account02">Account 02</option>
+            </select>
+        </div>
+
+        <!-- Note -->
+        <div class="mb-3">
+            <label for="note" class="form-label">Note</label>
+            <textarea id="note" class="form-control" rows="2" placeholder="Add a note..."></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button class="btn btn-success w-100">Add Transaction</button>
+    </div>
+</div>
+
+
+<!-- javascrpit part -->
+
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+ <script>
+    /* nav bar clicking*/
+    const navButtons = document.querySelectorAll('.bottom-nav button');
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            navButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        });
+    });
+
+    /* login fake */
+    const loggedIn = true; 
+    if(!loggedIn) {
+        window.location.href = 'index.html'; 
+    }
+ </script>
+
+ <script>
+    const datePicker = document.getElementById('datePicker');
+
+ </script>
+
+ <script>
+function goToPage(page) {
+    /* Temporary just log */
+    console.log("Redirect to:", page);
+    
+    
+}
+</script>
+
+<script>
+const logoutBtn = document.getElementById('logoutBtn');
+
+logoutBtn.addEventListener('click', () => {
+    /*logoout*/
+    localStorage.removeItem('loggedIn'); 
+    sessionStorage.removeItem('loggedIn');
+
+    /*to login*/
+    window.location.href = 'index.html'; /* should be changed to the login page */
+});
+</script>
+
+
+
+
+<!--Floating Add Button Functionality-->>
+<script>
+  
+  const addBtn = document.querySelector('.add-transaction-btn');
+  const addOverlay = document.getElementById('addCardOverlay');
+
+  addBtn.addEventListener('click', () => {
+      addOverlay.classList.toggle('active');  /* Show/hide overlay popup */
+      addBtn.classList.toggle('active');      /* Animate + to x and turn red */
+  });
+
+  /* Transaction type select */
+const typeButtons = document.querySelectorAll('.type-btn');
+
+typeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Remove active class from all type buttons
+        typeButtons.forEach(b => b.classList.remove('active'));
+        // Add active class to clicked button
+        btn.classList.add('active');
+    });
+});
+
+  /* Close overlay if clicked outside the card */
+  addOverlay.addEventListener('click', (e) => {
+      if(e.target === addOverlay){
+          addOverlay.classList.remove('active');
+          addBtn.classList.remove('active');
+      }
+  });
+</script>
+
+
+
+<script>
+    // ------------------ TRANSACTION MANAGEMENT ------------------ //
+const addTransactionBtn = document.querySelector('#addCard button.btn-success');
+const transactionsList = document.getElementById('transactions-list');
+
+let transactionsByDate = {}; // store transactions by date
+
+// Emoji for categories
+const categoryEmojis = {
+    food: "🍔",
+    transport: "🚌",
+    groceries: "🛒",
+    social: "🎉",
+    household: "🏠",
+    health: "💊",
+    education: "📚",
+    gift: "🎁",
+    other: "🔹"
+};
+
+// Add Transaction
+addTransactionBtn.addEventListener('click', () => {
+    const typeBtn = document.querySelector('.type-btn.active');
+    if (!typeBtn) { alert('Select transaction type'); return; }
+    const type = typeBtn.dataset.type;
+
+    const name = document.getElementById('transName').value.trim();
+    const date = document.getElementById('transDate').value;
+    const amount = parseFloat(document.getElementById('transAmount').value);
+    const currency = document.getElementById('currencyToggle').value;
+    const category = document.getElementById('categoryToggle').value;
+    const account = document.getElementById('accountToggle').value;
+    const note = document.getElementById('note').value;
+
+    if(!date || !name || !amount || !category || !account) {
+        alert('Please fill transaction name, date, amount, category and account');
+        return;
+    }
+
+    const transaction = { name, type, date, amount, currency, category, account, note };
+
+    if (!transactionsByDate[date]) transactionsByDate[date] = [];
+    transactionsByDate[date].push(transaction);
+
+    renderTransactions();
+
+    // Close popup
+    addOverlay.classList.remove('active');
+    addBtn.classList.remove('active');
+
+    // Reset form
+    document.getElementById('transName').value = '';
+    document.getElementById('transAmount').value = '';
+    document.getElementById('note').value = '';
+    typeBtn.classList.remove('active');
+});
+
+// Render Transactions
+function renderTransactions() {
+    transactionsList.innerHTML = '';
+
+    const dates = Object.keys(transactionsByDate).sort((a,b) => new Date(b) - new Date(a));
+
+    dates.forEach(date => {
+        let incomeTotal = 0;
+        let expenseTotal = 0;
+
+        transactionsByDate[date].forEach(t => {
+            if(t.type === 'income') incomeTotal += t.amount;
+            if(t.type === 'expense') expenseTotal += t.amount;
+        });
+
+        const dateGroup = document.createElement('div');
+        dateGroup.className = 'date-group';
+
+        dateGroup.innerHTML = `
+            <div class="date-header">
+                <div class="date-left">
+                    <span class="date-dot"></span>
+                    <span class="date-text">${formatDate(date)}</span>
+                </div>
+                <div class="date-income">Income: ${incomeTotal.toFixed(2)} LKR</div>
+                <div class="date-expense">Expenses: ${expenseTotal.toFixed(2)} LKR</div>
+            </div>
+        `;
+
+        transactionsByDate[date].forEach((t, index) => {
+            const row = document.createElement('div');
+            row.className = 'ledger-row';
+
+            row.innerHTML = `
+                <div class="ledger-title">${categoryEmojis[t.category]} ${t.category} • ${t.account} • ${t.name}</div>
+                <div class="ledger-income">${t.type==='income'? t.amount.toFixed(2) : ''}</div>
+                <div class="ledger-expense">${t.type==='expense'? t.amount.toFixed(2) : ''}</div>
+                <div class="dropdown ms-2">
+                    <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">⋮</button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item edit-btn" href="#">✏️ Edit</a></li>
+                        <li><a class="dropdown-item delete-btn" href="#">🗑 Delete</a></li>
+                    </ul>
+                </div>
+            `;
+
+            // Add Edit functionality
+            row.querySelector('.edit-btn').addEventListener('click', e => {
+                e.preventDefault();
+                document.getElementById('transName').value = t.name;
+                document.getElementById('transDate').value = t.date;
+                document.getElementById('transAmount').value = t.amount;
+                document.getElementById('currencyToggle').value = t.currency;
+                document.getElementById('categoryToggle').value = t.category;
+                document.getElementById('accountToggle').value = t.account;
+                document.getElementById('note').value = t.note;
+
+                // Type button
+                typeButtons.forEach(b => b.classList.remove('active'));
+                document.querySelector(`.type-btn[data-type="${t.type}"]`).classList.add('active');
+
+                // Remove old transaction
+                transactionsByDate[date].splice(index,1);
+
+                addOverlay.classList.add('active');
+                addBtn.classList.add('active');
+
+                renderTransactions();
+            });
+
+            // Add Delete functionality
+            row.querySelector('.delete-btn').addEventListener('click', e => {
+                e.preventDefault();
+                transactionsByDate[date].splice(index,1);
+                renderTransactions();
+            });
+
+            dateGroup.appendChild(row);
+        });
+
+        transactionsList.appendChild(dateGroup);
+    });
+
+    updateTotals();
+}
+
+// Update top card totals
+function updateTotals() {
+    let totalIncome = 0;
+    let totalExpense = 0;
+    Object.values(transactionsByDate).forEach(arr => {
+        arr.forEach(t => {
+            if(t.type==='income') totalIncome += t.amount;
+            if(t.type==='expense') totalExpense += t.amount;
+        });
+    });
+    document.querySelector('.top-card p:nth-child(1)').innerText = `Total Incomes: ${totalIncome.toFixed(2)} LKR`;
+    document.querySelector('.top-card p:nth-child(2)').innerText = `Total Expenses: ${totalExpense.toFixed(2)} LKR`;
+}
+
+// Format date
+function formatDate(dateStr){
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+</script>
+
+
+
+
+</body>
+</html>
