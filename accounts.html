@@ -154,16 +154,18 @@
         background: transparent;
         border: none;
         padding: 6px;
+        position: relative;
     }
     .bottom-nav button.active::after {
         content: '';
-        position: absolute;
+        position: absolute     ;
         bottom: -5px;
         left: 0;
         width: 100%;
         height: 3px;
         background: #ffffff;
         border-radius: 2px;
+        animation: slideIn 0.3s ease forwards;
     }
     .bottom-nav img {
         filter: brightness(0) invert(1);
@@ -184,6 +186,12 @@
     .sidebar-btn:hover {
         background: #e6e6e6;
     }
+
+    @keyframes slideIn {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
 </style>
 </head>
 <body>
@@ -196,13 +204,13 @@
   </div>
   <div class="offcanvas-body d-flex flex-column justify-content-between p-0">
     <ul class="list-group list-group-flush">
-      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('dashboard.html')">Dashboard</button></li>
-      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('profile.html')">Profile</button></li>
-      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('change-password.html')">Change Password</button></li>
-      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('settings.html')">Settings</button></li>
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('daily tansactions dashboard.html')">Dashboard</button></li>
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('profile.html')">Profile</button></li>  <!--Still developing-->
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('change-password.html')">Change Password</button></li> <!--Still developing-->
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('settings.html')">Settings</button></li> <!--Still developing-->
     </ul>
     <div class="p-3">
-      <button class="btn w-100 btn-outline-danger logout-btn">Logout</button>
+      <button class="btn w-100 btn-outline-danger logout-btn" onclick="goToPage('index.html')">Logout</button>
     </div>
   </div>
 </div>
@@ -276,18 +284,31 @@
     <button onclick="goToPage('daily tansactions dashboard.html')">
         <img src="assets/Icons/Bottom Nav Bar/trans.png" width="24">
     </button>
-    <button onclick="goToPage('events.html')">
+    <button onclick="goToPage('events.html')"> <!--still developing-->
         <img src="assets/Icons/Bottom Nav Bar/event.png" width="24">
     </button>
     <button class="active">
         <img src="assets/Icons/Bottom Nav Bar/acc.png" width="24">
     </button>
-    <button onclick="goToPage('stats.html')">
+    <button onclick="goToPage('stats.html')"> <!--still developing-->
         <img src="assets/Icons/Bottom Nav Bar/stat.png" width="24">
     </button>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+/* nav bar clicking*/
+const navButtons = document.querySelectorAll('.bottom-nav button');
+navButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        navButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    });
+});
+</script>
+
 <script>
     // Accounts data
     let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
@@ -432,5 +453,7 @@ function handleDelete(e) {
     // Initial render
     renderAccounts();
 </script>
+
+
 </body>
 </html>

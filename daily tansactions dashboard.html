@@ -523,9 +523,7 @@
         <div class="mb-3">
             <label for="accountToggle" class="form-label">Account</label>
             <select id="accountToggle" class="form-select">
-                <option value="cash">Cash</option>
-                <option value="account01">Account 01</option>
-                <option value="account02">Account 02</option>
+                <option value="">Select Account</option>     <!-- Real time acc created at acc pg -->
             </select>
         </div>
 
@@ -631,6 +629,10 @@ const addTransactionBtn = document.querySelector('#addCard button.btn-success');
 const transactionsList = document.getElementById('transactions-list');
 
 let transactionsByDate = {}; // store transactions by date
+
+// Load accounts dropdown
+loadAccounts();
+
 
 // Emoji for categories
 const categoryEmojis = {
@@ -768,6 +770,22 @@ function renderTransactions() {
     updateTotals();
 }
 
+// Load accounts from acc for dropdown
+function loadAccounts() {
+    const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+    const accountSelect = document.getElementById('accountToggle');
+    
+    // Clear existing options except first
+    accountSelect.innerHTML = '<option value="">Select Account</option>';
+    
+    accounts.forEach(account => {
+        const option = document.createElement('option');
+        option.value = account.name;
+        option.textContent = `${account.name} (${account.balance.toLocaleString()} ${account.currency})`;
+        accountSelect.appendChild(option);
+    });
+}
+
 // Update top card totals
 function updateTotals() {
     let totalIncome = 0;
@@ -788,6 +806,26 @@ function formatDate(dateStr){
     return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
 }
 
+</script>
+
+<script>
+// Load accounts dropdown 
+function loadAccounts() {
+    const accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+    const accountSelect = document.getElementById('accountToggle');
+    
+    accountSelect.innerHTML = '<option value="">Select Account</option>';
+    
+    accounts.forEach(account => {
+        const option = document.createElement('option');
+        option.value = account.name;
+        option.textContent = `${account.name} (${account.balance.toLocaleString()} ${account.currency})`;
+        accountSelect.appendChild(option);
+    });
+}
+
+// Call on load
+loadAccounts();
 </script>
 
 
