@@ -51,7 +51,7 @@
      .title {
     margin: 0;
     font-weight: 600;
-    text-align: center -;
+    text-align: center;
     }
 
 
@@ -81,7 +81,7 @@
 
     .add-popup-overlay {
     position: fixed;
-    top
+    top:0;
     }
 
      /* Overlay behind the card */
@@ -390,7 +390,7 @@
     <!-- list of items  -->
     <ul class="list-group list-group-flush">
   <li class="list-group-item">
-    <button class="sidebar-btn w-100" onclick="goToPage('dashboard.html')">Dashboard</button>
+    <button class="sidebar-btn w-100" onclick="goToPage('daily tansactions dashboard.html')">Dashboard</button>
   </li>
   <li class="list-group-item">
     <button class="sidebar-btn w-100" onclick="goToPage('profile.html')">Profile</button>
@@ -405,15 +405,12 @@
 
     <!-- Logout at Bottom -->
     <div class="p-3">
-      <button class="btn w-100 btn-outline-danger logout-btn">Logout</button>
+      <button class="btn w-100 btn-outline-danger logout-btn"onclick="goToPage('index.html')">Logout</button>
     </div>
   </div>
 </div>
 
 
-
-
-<!-- Top Card -->
 
 <!-- Top Card -->
 <div class="top-card">
@@ -459,7 +456,7 @@
    <button onclick="location.href='accounts.html'">
         <img src="assets/Icons/Bottom Nav Bar/acc.png" style="background-color: transparent;" width="24">
     </button>
-    <button >
+    <button onclick="location.href='statistics.html'" >
         <img src="assets\Icons\Bottom Nav Bar\stat.png" style="background-color: transparent;" width="24">
     </button>
 </div>
@@ -589,7 +586,7 @@ logoutBtn.addEventListener('click', () => {
 
 
 
-<!--Floating Add Button Functionality-->>
+<!--Floating Add Button Functionality-->
 <script>
   
   const addBtn = document.querySelector('.add-transaction-btn');
@@ -826,6 +823,14 @@ function loadAccounts() {
 
 // Call on load
 loadAccounts();
+const transaction = {
+    id: Date.now(),
+    accountId: selectedAccountId,   // Must match the account id
+    type: "income" | "expense",
+    amount: parseFloat(amountInput),
+    date: new Date().toISOString()
+};
+
 </script>
 
 

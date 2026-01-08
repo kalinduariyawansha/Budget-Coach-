@@ -114,7 +114,7 @@
         z-index: 20;
     }
     #addCardOverlay.active {
-        background: rgba(0,0,0,0.4d);
+        background: rgba(0,0,0,0.4);
         backdrop-filter: blur(4px);
         pointer-events: auto;
     }
@@ -290,7 +290,7 @@
     <button class="active">
         <img src="assets/Icons/Bottom Nav Bar/acc.png" width="24">
     </button>
-    <button onclick="goToPage('stats.html')"> <!--still developing-->
+    <button onclick="goToPage('statistics.html')"> <!--still developing-->
         <img src="assets/Icons/Bottom Nav Bar/stat.png" width="24">
     </button>
 </div>
@@ -307,152 +307,177 @@ navButtons.forEach(btn => {
         btn.classList.add('active');
     });
 });
-</script>
 
-<script>
-    // Accounts data
-    let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
+function goToPage(page) {
+    window.location.href = page;
+}
 
-    // Elements
-    const addBtn = document.getElementById('addBtn');
-    const overlay = document.getElementById('addCardOverlay');
-    const saveBtn = document.getElementById('saveAccount');
-    const closeBtn = document.getElementById('closeBtn');
-    const accountsList = document.getElementById('accounts-list');
 
-    // Toggle popup
-    addBtn.addEventListener('click', () => {
-        overlay.classList.toggle('active');
-        addBtn.classList.toggle('active');
-    });
 
-    // Close on overlay click
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            overlay.classList.remove('active');
-            addBtn.classList.remove('active');
-            resetForm();
-        }
-    });
+  // ======== DATA ========
+  let accounts = JSON.parse(localStorage.getItem('accounts')) || [];
 
-    closeBtn.addEventListener('click', () => {
-        overlay.classList.remove('active');
-        addBtn.classList.remove('active');
-        resetForm();
-    });
+  // ======== ELEMENTS ========
+  const addBtn = document.getElementById('addBtn');
+  const overlay = document.getElementById('addCardOverlay');
+  const saveBtn = document.getElementById('saveAccount');
+  const closeBtn = document.getElementById('closeBtn');
+  const accountsList = document.getElementById('accounts-list');
 
-    // Save account
-    saveBtn.addEventListener('click', () => {
+  // ======== TOGGLE POPUP ========
+  addBtn.addEventListener('click', () => {
+    overlay.classList.add('active');
+    addBtn.classList.add('active');
+    resetForm();
+    delete window.editingIndex;
+  });
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove('active');
+      addBtn.classList.remove('active');
+      resetForm();
+      delete window.editingIndex;
+    }
+  });
+
+  closeBtn.addEventListener('click', () => {
+    overlay.classList.remove('active');
+    addBtn.classList.remove('active');
+    resetForm();
+    delete window.editingIndex;
+  });
+
+  // ======== SAVE / CREATE / EDIT ========
+  saveBtn.addEventListener('click', () => {
     const name = document.getElementById('accountName').value.trim();
     const type = document.getElementById('accountType').value;
-    const balanceInput = document.getElementById('accountBalance').value;
-    const balance = parseFloat(balanceInput) || 0;
+    const balanceInput = document.getElementById('accountBalance').value.trim();
+    const balance = balanceInput === '' ? 0 : parseFloat(balanceInput);
     const currency = document.getElementById('currency').value;
     const desc = document.getElementById('description').value.trim();
 
-    if (!name || balanceInput === '' || isNaN(balance)) {
-        alert('Please enter account name and valid balance');
-        return;
+    // VALIDATION
+    if (!name) {
+      alert('Please enter account name');
+      return;
+    }
+    if (balanceInput !== '' && isNaN(balance)) {
+      alert('Please enter a valid numeric balance');
+      return;
     }
 
-    const account = { name, type, balance, currency, desc };
-    
+    // CREATE OR EDIT
     if (window.editingIndex !== undefined) {
-        accounts[window.editingIndex] = account;
-        delete window.editingIndex;
+      accounts[window.editingIndex] = {
+        ...accounts[window.editingIndex],
+        name,
+        type,
+        balance,
+        currency,
+        desc
+      };
+      delete window.editingIndex;
     } else {
-        accounts.push(account);
+      accounts.push({
+        id: Date.now(),
+        name,
+        type,
+        balance,
+        currency,
+        desc
+      });
     }
-    
+
     localStorage.setItem('accounts', JSON.stringify(accounts));
     renderAccounts();
     overlay.classList.remove('active');
     addBtn.classList.remove('active');
     resetForm();
-});
+  });
 
+  // ======== RENDER ========
+  function renderAccounts() {
+    accountsList.innerHTML = '';
+    if (accounts.length === 0) {
+      accountsList.innerHTML = `<p class="text-center text-muted mt-3">No accounts created yet</p>`;
+      return;
+    }
 
-    function handleEdit(e) {
+    accounts.forEach((account, index) => {
+      const item = document.createElement('div');
+      item.className = 'account-item green';
+      item.innerHTML = `
+        <div style="flex:1">
+          <div class="account-name">${account.name}</div>
+          <small class="text-muted">${account.desc || account.type}</small>
+        </div>
+        <div class="text-end" style="min-width:100px">
+          <div class="account-balance">${account.balance.toLocaleString()} ${account.currency}</div>
+          <small>${account.type}</small>
+        </div>
+        <div class="dropdown ms-2">
+          <button class="btn btn-sm btn-outline-secondary p-1" data-bs-toggle="dropdown">⋮</button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item edit-account" href="#" data-index="${index}">✏️ Edit</a></li>
+            <li><a class="dropdown-item delete-account" href="#" data-index="${index}">🗑 Delete</a></li>
+          </ul>
+        </div>
+      `;
+      accountsList.appendChild(item);
+    });
+
+    // EDIT / DELETE LISTENERS
+    document.querySelectorAll('.edit-account').forEach(btn => {
+      btn.addEventListener('click', handleEdit);
+    });
+    document.querySelectorAll('.delete-account').forEach(btn => {
+      btn.addEventListener('click', handleDelete);
+    });
+  }
+
+  // ======== EDIT ========
+  function handleEdit(e) {
     e.preventDefault();
     const index = parseInt(e.target.dataset.index);
     const account = accounts[index];
-    
+
     document.getElementById('accountName').value = account.name;
     document.getElementById('accountType').value = account.type;
     document.getElementById('accountBalance').value = account.balance;
     document.getElementById('currency').value = account.currency;
     document.getElementById('description').value = account.desc || '';
-    
+
     overlay.classList.add('active');
     addBtn.classList.add('active');
-    
-    window.editingIndex = index;
-}
 
-function handleDelete(e) {
+    window.editingIndex = index;
+  }
+
+  // ======== DELETE ========
+  function handleDelete(e) {
     e.preventDefault();
     const index = parseInt(e.target.dataset.index);
     if (confirm('Delete this account?')) {
-        accounts.splice(index, 1);
-        localStorage.setItem('accounts', JSON.stringify(accounts));
-        renderAccounts();
+      accounts.splice(index, 1);
+      localStorage.setItem('accounts', JSON.stringify(accounts));
+      renderAccounts();
     }
-}
+  }
 
-    
-    // Render accounts
-    function renderAccounts() {
-        accountsList.innerHTML = '';
-        accounts.forEach((account, index) => {
-            const item = document.createElement('div');
-            item.className = 'account-item green';
-            item.innerHTML = `
-                <div style="flex: 1;">
-                    <div class="account-name">${account.name}</div>
-                    <small class="text-muted">${account.desc || account.type}</small>
-                </div>
-                <div class="text-end" style="min-width: 100px;">
-                    <div class="account-balance">${account.balance.toLocaleString()} ${account.currency}</div>
-                    <small>${account.type}</small>
-                </div>
-                <div class="dropdown ms-2">
-                    <button class="btn btn-sm btn-outline-secondary p-1" data-bs-toggle="dropdown">⋮</button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item edit-account" href="#" data-index="${index}">✏️ Edit</a></li>
-                        <li><a class="dropdown-item delete-account" href="#" data-index="${index}">🗑 Delete</a></li>
-                    </ul>
-                </div>
-            `;
-            accountsList.appendChild(item);
-        });
+  // ======== RESET FORM ========
+  function resetForm() {
+    document.getElementById('accountName').value = '';
+    document.getElementById('accountBalance').value = '';
+    document.getElementById('description').value = '';
+    document.getElementById('accountType').value = 'savings';
+    document.getElementById('currency').value = 'LKR';
+  }
 
-    // Add event listeners AFTER rendering
-    document.querySelectorAll('.edit-account').forEach(btn => {
-        btn.addEventListener('click', handleEdit);
-    });
-    document.querySelectorAll('.delete-account').forEach(btn => {
-        btn.addEventListener('click', handleDelete);
-    });
-}
-
-
-    
-
-    function resetForm() {
-        document.getElementById('accountName').value = '';
-        document.getElementById('accountBalance').value = '';
-        document.getElementById('description').value = '';
-        document.getElementById('accountType').value = 'savings';
-        document.getElementById('currency').value = 'LKR';
-    }
-
-    function goToPage(page) {
-        window.location.href = page;
-    }
-
-    // Initial render
-    renderAccounts();
+  // ======== INITIAL RENDER ========
+  renderAccounts();
 </script>
+
 
 
 </body>
