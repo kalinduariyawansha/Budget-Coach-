@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Events</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6f4;
+}
+
+/* ---------- TOP BAR ---------- */
+.top-bar{
+  background:#375534;
+  color:#fff;
+  padding:15px;
+  text-align:center;
+  border-radius:0 0 20px 20px;
+}
+
+/* ---------- EVENT LIST ---------- */
+.event-card{
+  background:#e5efc8;
+  border-radius:15px;
+  padding:15px;
+  margin-bottom:10px;
+  cursor:pointer;
+}
+
+/* ---------- EVENT DETAILS ---------- */
+.event-header{
+  background:#9bbd3b;
+  color:#fff;
+  padding:15px;
+  border-radius:0 0 20px 20px;
+}
+
+.event-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.event-dates{
+  font-size:12px;
+  color:#555;
+}
+
+.progress{
+  height:8px;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:8px;
+  background:#dcdcdc;
+}
+
+.progress-bar{
+  background:#9bbd3b;
+}
+
+
+/* ---------- LEDGER ---------- */
+.ledger-row{
+  display:flex;
+  justify-content:space-between;
+  padding:8px;
+  border-bottom:1px solid #eee;
+}
+
+/* ---------- FLOAT BUTTON ---------- */
+.fab{
+  position:fixed;
+  bottom:80px;
+  right:20px;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:#9bbd3b;
+  color:#fff;
+  font-size:32px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:30;
+}
+
+/* ---------- POPUP ---------- */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:20;
+}
+
+.popup{
+  background:#fff;
+  padding:20px;
+  padding-bottom:70px; 
+  border-radius:15px;
+  width:90%;
+  max-width:400px;
+  position:relative;
+}
+
+
+.close-btn{
+  position:absolute;
+  bottom:16px;
+  right:16px;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:#dc3545;
+  color:#fff;
+  border:none;
+  font-size:18px;
+  font-weight:bold;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+/* ---------- BOTTOM NAV ---------- */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  width:100%;
+  height:60px;
+  background:#375534;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  border-radius:20px 20px 0 0;
+}
+
+.bottom-nav button{
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:14px;
+  position: relative;
+}
+
+.bottom-nav button.active::after{
+  content:'';
+  position:absolute;
+  bottom:-5px;
+  left:0;
+  width:100%;
+  height:3px;
+  background:#fff;
+  border-radius:2px;  
+}
+
+
+.delete-btn{
+  background:#198754;      
+  border:none;
+  color:#fff;
+}
+
+.delete-btn:hover{
+  background:#157347;      
+}
+
+.eventTitle{
+  font-size:18px;
+  font-weight:600;
+}
+
+.eventDateRange{
+  font-size:13px;
+  opacity:.9;
+}
+
+.eventBalance{
+  font-size:20px;
+  margin-top:4px;
+}
+
+.event-header{
+  background:#9bbd3b;
+  color:#fff;
+  padding:15px;
+  border-radius:0 0 20px 20px;
+}
+
+.event-header small{
+  opacity:.9;
+  font-size:13px;
+}
+
+.ledger-row{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  padding:8px 0;
+  border-bottom:1px solid #eee;
+  font-size:14px;
+}
+
+.ledger-income{
+  color:green;
+  text-align:left;
+}
+
+.ledger-expense{
+  color:red;
+  text-align:right;
+}
+
+.ledger-header,
+.ledger-item{
+  display:grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  padding:6px 0;
+  font-size:14px;
+}
+
+.ledger-header{
+  font-weight:600;
+  border-bottom:1px solid #ccc;
+  margin-top:12px;
+}
+
+.ledger-date{
+  font-weight:600;
+}
+
+.ledger-income{
+  color:green;
+  text-align:right;
+}
+
+.ledger-expense{
+  color:red;
+  text-align:right;
+}
+
+.ledger-note{
+  font-size:12px;
+  opacity:.8;
+}
+
+.sidebar-btn {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0;
+  text-align: left;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.sidebar-btn:hover {
+  background: #e6e6e6;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Side Panel -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="sidePanel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">Menu</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+
+  <div class="offcanvas-body d-flex flex-column justify-content-between p-0">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <button class="sidebar-btn w-100" onclick="goToPage('dashboard.html')">Dashboard</button>
+      </li>
+      <li class="list-group-item">
+        <button class="sidebar-btn w-100" onclick="goToPage('profile.html')">Profile</button>
+      </li>
+      <li class="list-group-item">
+        <button class="sidebar-btn w-100" onclick="goToPage('change-password.html')">Change Password</button>
+      </li>
+      <li class="list-group-item">
+        <button class="sidebar-btn w-100" onclick="goToPage('settings.html')">Settings</button>
+      </li>
+    </ul>
+
+    <div class="p-3">
+      <button class="btn w-100 btn-outline-danger" onclick="logout()">Logout</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================= EVENT LIST SCREEN ================= -->
+<div id="eventListScreen">
+
+  <div class="top-bar d-flex align-items-center justify-content-between px-3">
+    <button
+      class="btn btn-sm btn-outline-light"
+      data-bs-toggle="offcanvas"
+      data-bs-target="#sidePanel">
+      &#9776;
+    </button>
+
+    <span class="fw-bold">EVENT LIST</span>
+
+    <div style="width:32px"></div>
+  </div>
+
+
+  <div class="container mt-3" id="eventList"></div>
+
+  <div class="fab" onclick="openEventPopup()">+</div>
+</div>
+
+<!-- ================= EVENT DETAILS SCREEN ================= -->
+<div id="eventDetailsScreen" style="display:none">
+
+<div class="event-header text-center">
+  <button class="btn btn-sm btn-light mb-2" onclick="backToList()">←</button>
+
+  <h5 id="eventTitle" class="mb-1"></h5>
+  <small id="eventDateRange"></small>
+</div>
+
+<div class="container mt-3">
+
+  <div class="mb-3">
+    <small>Budget</small>
+    <div class="progress mt-1">
+      <div id="detailProgress" class="progress-bar"></div>
+    </div>
+    <small id="detailPercent"></small>
+  </div>
+
+  <div class="mb-3">
+    <small>Balance</small>
+    <div id="eventBalance" class="fw-bold"></div>
+  </div>
+
+  <div id="eventLedger"></div>
+</div>
+
+  <div class="fab" onclick="openTransactionPopup()">+</div>
+</div>
+
+<!-- ================= CREATE EVENT POPUP ================= -->
+<div class="overlay" id="eventPopup" onclick="closeEventPopup(event)">
+  <div class="popup">
+    <h5>Create Event</h5>
+    <input class="form-control mb-2" id="evName" placeholder="Event Name">
+    <input class="form-control mb-2" id="evCategory" placeholder="Category">
+    <div class="row mb-3">
+       <div class="col-6">
+          <label class="form-label">From</label>
+          <input type="date" class="form-control" id="evStart">
+       </div>
+       <div class="col-6">
+          <label class="form-label">To</label>
+          <input type="date" class="form-control" id="evEnd">
+       </div>
+    </div>
+
+    <input type="number" class="form-control mb-3" id="evBudget" placeholder="Initial Budget (LKR)">
+    <button class="btn btn-success w-100" onclick="saveEvent()">SAVE</button>
+    <button class="close-btn" onclick="hideEventPopup()">×</button>
+  </div>
+</div>
+
+<!-- ================= ADD TRANSACTION POPUP ================= -->
+<div class="overlay" id="transPopup">
+  <div class="popup">
+
+    <h5>Add Transaction</h5>
+
+    <div class="btn-group w-100 mb-3">
+      <button class="btn btn-outline-success active"
+              id="btnIncome" 
+              onclick="selectType('income')">
+        Income
+      </button>
+      <button class="btn btn-outline-danger"
+              id="btnExpense"
+              onclick="selectType('expense')">
+        Expense
+      </button>
+    </div>
+
+  
+    <input type="date" class="form-control mb-2" id="trDate">
+
+    <input type="number" class="form-control mb-2" id="trAmount"
+           placeholder="Amount">
+
+    <select class="form-select mb-2" id="trCategory">
+      <option value="">Select Category</option>
+      <option>Salary</option>
+      <option>Food</option>
+      <option>Transport</option>
+      <option>Shopping</option>
+    </select>
+
+    <select class="form-select mb-2" id="trAccount">
+      <option value="">Select Account</option>
+      <option>Cash</option>
+      <option>Bank</option>
+      <option>Card</option>
+    </select>
+
+    <input class="form-control mb-2" id="trNote" placeholder="Note">
+    <input type="file" class="form-control mb-3" id="trDoc">
+
+    <button class="btn btn-success w-100 mb-2" onclick="addTransaction()">
+      SAVE
+    </button>
+
+    <button class="close-btn" onclick="hideTransPopup()">×</button>
+  </div>
+</div>
+
+
+<!-- ================= BOTTOM NAV ================= -->
+<div class="bottom-nav">
+  <button onclick="switchToTransactions()">
+    <img src="assets/Icons/Bottom Nav Bar/trans.png" width="24">
+  </button>
+
+  <button onclick="switchToEvents()">
+    <img src="assets/Icons/Bottom Nav Bar/event.png" width="24">
+  </button>
+
+  <button onclick="switchToAccounts()">
+    <img src="assets/Icons/Bottom Nav Bar/acc.png" width="24">
+  </button>
+
+  <button onclick="switchToStats()">
+    <img src="assets/Icons/Bottom Nav Bar/stat.png" width="24">
+  </button>
+</div>
+
+<script>
+const eventList = document.getElementById("eventList");
+const eventListScreen = document.getElementById("eventListScreen");
+const eventDetailsScreen = document.getElementById("eventDetailsScreen");
+const eventPopup = document.getElementById("eventPopup");
+const transPopup = document.getElementById("transPopup");
+const btnIncome = document.getElementById("btnIncome");
+const btnExpense = document.getElementById("btnExpense");
+
+
+/* ---------------- DATA ---------------- */
+let events = JSON.parse(localStorage.getItem("events")) || [];
+let activeEvent = null;
+let selectedType = "income";
+
+function selectType(type){
+  selectedType = type;
+
+  btnIncome.classList.remove("active");
+  btnExpense.classList.remove("active");
+
+  if(type === "income"){
+    btnIncome.classList.add("active");
+  } else {
+    btnExpense.classList.add("active");
+  }
+}
+
+
+/* ---------------- EVENT LIST ---------------- */
+function renderEventList(){
+  eventList.innerHTML = "";
+
+  events.forEach(e => {
+
+    let expense = 0;
+    e.transactions.forEach(t => {
+      if(t.type === "expense") expense += t.amount;
+    });
+
+    let percent = e.budget > 0
+      ? Math.min((expense / e.budget) * 100, 100)
+      : 0;
+
+    let remainingPercent = 100 - percent;
+  
+    let barColor =
+      percent > 80 ? "#dc3545" :
+      percent > 50 ? "#ffc107" :
+      "#9bbd3b";
+
+    eventList.innerHTML += `
+      <div class="event-card">
+
+        <div class="event-top">
+          <div onclick="openEvent('${e.id}')" style="cursor:pointer">
+            <b>${e.name}</b>
+            <div class="event-dates">${e.start}</div>
+          </div>
+
+          <div class="text-end">
+            <div class="event-dates">${e.end}</div>
+            <button type="button" class="btn btn-sm delete-btn mt-1"
+               onclick="deleteEvent('${e.id}', event)">
+               🗑
+            </button>
+
+          </div>
+        </div>
+
+        <div class="progress">
+          <div class="progress-bar"
+               style="width:${percent}%; background:${barColor}">
+          </div>
+        </div>
+
+        <small>
+           ${percent.toFixed(0)}% used • ${remainingPercent.toFixed(0)}% remaining
+        </small>
+      </div>
+    `;
+  });
+}
+
+
+function deleteEvent(id, ev){
+  ev.stopPropagation(); // prevents opening event
+
+  if(!confirm("Are you sure you want to delete this event?")) return;
+
+  events = events.filter(e => e.id !== id);
+  localStorage.setItem("events", JSON.stringify(events));
+
+  renderEventList();
+}
+
+/* ---------------- CREATE EVENT ---------------- */
+function openEventPopup(){ eventPopup.style.display="flex"; }
+
+function saveEvent(){
+  events.push({
+    id:"evt_"+Date.now(),
+    name:evName.value,
+    category:evCategory.value,
+    start:evStart.value,
+    end:evEnd.value,
+    budget:+evBudget.value,
+    transactions:[]
+  });
+  localStorage.setItem("events",JSON.stringify(events));
+  
+  evName.value = "";
+  evCategory.value = "";
+  evStart.value = "";
+  evEnd.value = "";
+  evBudget.value = "";
+
+  eventPopup.style.display="none";
+  renderEventList();
+}
+
+function hideEventPopup(){
+  eventPopup.style.display = "none";
+}
+
+function hideTransPopup(){
+  transPopup.style.display = "none";
+}
+
+// Close when clicking outside popup
+function closeEventPopup(e){
+  if(e.target.id === "eventPopup"){
+    hideEventPopup();
+  }
+}
+
+function closeTransPopup(e){
+  if(e.target.id === "transPopup"){
+    hideTransPopup();
+  }
+}
+
+
+/* ---------------- EVENT DETAILS ---------------- */
+function openEvent(id){
+  activeEvent = events.find(e=>e.id===id);
+  eventListScreen.style.display="none";
+  eventDetailsScreen.style.display="block";
+  renderEventDetails();
+}
+
+function backToList(){
+  eventDetailsScreen.style.display="none";
+  eventListScreen.style.display="block";
+  renderEventList();
+}
+
+/* ---------------- TRANSACTIONS ---------------- */
+function openTransactionPopup(){
+  selectedType = "income";
+  btnIncome.classList.add("active");
+  btnExpense.classList.remove("active");
+  transPopup.style.display="flex";
+}
+
+function addTransaction(){
+  if(!trDate.value || !trAmount.value){
+    alert("Please enter date and amount");
+    return;
+  }
+ 
+  activeEvent.transactions.push({
+    type: selectedType,
+    date: trDate.value,
+    amount: +trAmount.value,
+    category: trCategory.value,
+    account: trAccount.value,
+    note: trNote.value,
+    document: trDoc.value
+  });
+
+  localStorage.setItem("events", JSON.stringify(events));
+
+  // Clear form
+  trDate.value = "";
+  trAmount.value = "";
+  trCategory.value = "";
+  trAccount.value = "";
+  trNote.value = "";
+  trDoc.value = "";
+
+  hideTransPopup();
+  renderEventDetails();
+  renderEventList();
+}
+
+/* ---------------- RENDER DETAILS ---------------- */
+function renderEventDetails(){
+
+  eventTitle.innerText = activeEvent.name;
+  eventDateRange.innerText = `From ${activeEvent.start} to ${activeEvent.end}`;
+
+  let income = 0;
+  let expense = 0;
+  eventLedger.innerHTML = "";
+
+  const grouped = {};
+
+  activeEvent.transactions.forEach(t=>{
+    if(!grouped[t.date]) grouped[t.date] = [];
+    grouped[t.date].push(t);
+
+    if(t.type === "income") income += t.amount;
+    else expense += t.amount;
+  });
+
+  for(const date in grouped){
+
+    const d = new Date(date);
+    const day = d.toLocaleDateString("en-US",{ weekday:"short" });
+
+    eventLedger.innerHTML += `
+      <div class="ledger-header">
+        <div class="ledger-date">
+          ${date}<br><small>${day}</small>
+        </div>
+        <div class="text-end">Income</div>
+        <div class="text-end">Expense</div>
+      </div>
+    `;
+
+    grouped[date].forEach(t=>{
+      eventLedger.innerHTML += `
+        <div class="ledger-item">
+          <div>
+            ${t.category || "—"}
+            <div class="ledger-note">${t.note || ""}</div>
+          </div>
+
+          <div class="ledger-income">
+            ${t.type === "income" ? `LKR ${t.amount.toLocaleString()}` : ""}
+          </div>
+
+          <div class="ledger-expense">
+            ${t.type === "expense" ? `LKR ${t.amount.toLocaleString()}` : ""}
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  let percent = activeEvent.budget > 0
+    ? Math.min((expense / activeEvent.budget) * 100, 100)
+    : 0;
+
+  detailProgress.style.width = percent + "%";
+  detailProgress.style.background =
+    percent > 80 ? "#dc3545" :
+    percent > 50 ? "#ffc107" :
+    "#9bbd3b";
+
+  detailPercent.innerText = `${percent.toFixed(0)}% used`;
+
+  let remaining = activeEvent.budget - expense;
+  eventBalance.innerText = "LKR " + remaining.toLocaleString();
+}
+
+/* ---------------- INIT ---------------- */
+eventDetailsScreen.style.display = "none";
+eventListScreen.style.display = "block";
+activeEvent = null;
+renderEventList();
+
+const navBtns = document.querySelectorAll('.bottom-nav button');
+
+function switchToTransactions(){
+  location.href="daily tansactions dashboard.html";
+}
+
+function switchToEvents(){
+  location.href = "events.html";
+}
+
+function switchToAccounts(){
+  location.href="accounts.html";
+}
+function switchToStats(){
+  location.href="stats.html";
+}
+
+
+const page = location.pathname.split("/").pop();
+
+navBtns.forEach(b => b.classList.remove('active'));
+
+if(page === "daily tansactions dashboard.html") navBtns[0].classList.add('active');
+else if(page === "events.html") navBtns[1].classList.add('active');
+else if(page === "accounts.html") navBtns[2].classList.add('active');
+else if(page === "stats.html") navBtns[3].classList.add('active');
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function goToPage(page){
+  location.href = page;
+}
+
+function logout(){
+  localStorage.removeItem("loggedIn");
+  sessionStorage.removeItem("loggedIn");
+  location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
