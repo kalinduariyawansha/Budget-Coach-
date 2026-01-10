@@ -12,29 +12,38 @@ body{
   background:#f4f6f4;
 }
 
-/* ---------- TOP BAR ---------- */
-.top-bar{
-  background:#375534;
-  color:#fff;
-  padding:15px;
-  text-align:center;
-  border-radius:0 0 20px 20px;
+/* ---------- TOP CARD ---------- */
+.top-card {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #9bbd3b;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1a);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  color: white;
 }
 
+
 /* ---------- EVENT LIST ---------- */
-.event-card{
-  background:#e5efc8;
-  border-radius:15px;
-  padding:15px;
-  margin-bottom:10px;
-  cursor:pointer;
-}
+.top-card {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #9bbd3b;
+        padding: 1rem;
+        box-shadow: 0 2px 4px #0000001a;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        color: white;
+    }
 
 /* ---------- EVENT DETAILS ---------- */
 .event-header{
   background:#9bbd3b;
   color:#fff;
-  padding:15px;
+  padding: 15px;
   border-radius:0 0 20px 20px;
 }
 
@@ -73,19 +82,31 @@ body{
 /* ---------- FLOAT BUTTON ---------- */
 .fab{
   position:fixed;
-  bottom:80px;
+  bottom:70px;
   right:20px;
-  width:56px;
-  height:56px;
+  width:60px;
+  height:60px;
   border-radius:50%;
   background:#9bbd3b;
   color:#fff;
-  font-size:32px;
+  font-size: 2rem;
   display:flex;
   align-items:center;
   justify-content:center;
+  box-shadow: 0 4px 12px #00000033;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
   z-index:30;
+  border: none !important;  
+  outline: none;    
 }
+.fab.close {
+  background: #ff0000;
+    transform: rotate(45deg) scale(1.1); /* + rotates to x */
+}
+
+
+
 
 /* ---------- POPUP ---------- */
 .overlay{
@@ -133,7 +154,7 @@ body{
   bottom:0;
   width:100%;
   height:60px;
-  background:#375534;
+  background:#98B528;
   display:flex;
   justify-content:space-around;
   align-items:center;
@@ -161,18 +182,19 @@ body{
 
 
 .delete-btn{
-  background:#198754;      
+  background:#98B528;      
   border:none;
   color:#fff;
 }
 
 .delete-btn:hover{
-  background:#157347;      
+  background:#98B528;      
 }
 
-.eventTitle{
-  font-size:18px;
-  font-weight:600;
+.title {
+  margin: 0;
+  font-weight: 600;
+  text-align: center;
 }
 
 .eventDateRange{
@@ -185,11 +207,11 @@ body{
   margin-top:4px;
 }
 
-.event-header{
-  background:#9bbd3b;
-  color:#fff;
-  padding:15px;
-  border-radius:0 0 20px 20px;
+.event-header {
+  background: #9bbd3b;
+  color: #fff;
+  padding: 15px;
+  border-radius: 0 0 20px 20px;
 }
 
 .event-header small{
@@ -206,12 +228,12 @@ body{
 }
 
 .ledger-income{
-  color:green;
+  color:#008000;
   text-align:left;
 }
 
 .ledger-expense{
-  color:red;
+  color:#df6c01;
   text-align:right;
 }
 
@@ -239,7 +261,7 @@ body{
 }
 
 .ledger-expense{
-  color:red;
+  color:#db6504;
   text-align:right;
 }
 
@@ -300,23 +322,18 @@ body{
 <!-- ================= EVENT LIST SCREEN ================= -->
 <div id="eventListScreen">
 
-  <div class="top-bar d-flex align-items-center justify-content-between px-3">
-    <button
-      class="btn btn-sm btn-outline-light"
-      data-bs-toggle="offcanvas"
-      data-bs-target="#sidePanel">
-      &#9776;
-    </button>
-
-    <span class="fw-bold">EVENT LIST</span>
-
+  <div class="top-card">
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <button class="btn btn-sm btn-outline-light" data-bs-toggle="offcanvas" data-bs-target="#sidePanel">&#9776;</button>
+    <h5 class="m-0 flex-grow-1 text-center title">EVENTS</h5>
     <div style="width:32px"></div>
   </div>
+</div>
 
 
   <div class="container mt-3" id="eventList"></div>
 
-  <div class="fab" onclick="openEventPopup()">+</div>
+  <button class="fab" id="fabBtn" onclick="toggleEventPopup()">+</button>
 </div>
 
 <!-- ================= EVENT DETAILS SCREEN ================= -->
@@ -347,7 +364,7 @@ body{
   <div id="eventLedger"></div>
 </div>
 
-  <div class="fab" onclick="openTransactionPopup()">+</div>
+  <button class="add-event-btn" id="addEventBtn">+</button>
 </div>
 
 <!-- ================= CREATE EVENT POPUP ================= -->
@@ -369,7 +386,7 @@ body{
 
     <input type="number" class="form-control mb-3" id="evBudget" placeholder="Initial Budget (LKR)">
     <button class="btn btn-success w-100" onclick="saveEvent()">SAVE</button>
-    <button class="close-btn" onclick="hideEventPopup()">×</button>
+
   </div>
 </div>
 
@@ -420,26 +437,26 @@ body{
       SAVE
     </button>
 
-    <button class="close-btn" onclick="hideTransPopup()">×</button>
+    <button class="close-btn" onclick="hideTransPopup()">CANCEL</button>
   </div>
 </div>
 
 
 <!-- ================= BOTTOM NAV ================= -->
 <div class="bottom-nav">
-  <button onclick="switchToTransactions()">
+  <button onclick="location.href='daily tansactions dashboard.html'">
     <img src="assets/Icons/Bottom Nav Bar/trans.png" width="24">
   </button>
 
-  <button onclick="switchToEvents()">
+  <button class="active" >
     <img src="assets/Icons/Bottom Nav Bar/event.png" width="24">
   </button>
 
-  <button onclick="switchToAccounts()">
+  <button onclick="location.href='accounts.html'">
     <img src="assets/Icons/Bottom Nav Bar/acc.png" width="24">
   </button>
 
-  <button onclick="switchToStats()">
+  <button onclick="location.href='statistics.html'">
     <img src="assets/Icons/Bottom Nav Bar/stat.png" width="24">
   </button>
 </div>
@@ -529,54 +546,30 @@ function renderEventList(){
 }
 
 
-function deleteEvent(id, ev){
-  ev.stopPropagation(); // prevents opening event
-
-  if(!confirm("Are you sure you want to delete this event?")) return;
-
-  events = events.filter(e => e.id !== id);
-  localStorage.setItem("events", JSON.stringify(events));
-
-  renderEventList();
-}
-
 /* ---------------- CREATE EVENT ---------------- */
-function openEventPopup(){ eventPopup.style.display="flex"; }
-
-function saveEvent(){
-  events.push({
-    id:"evt_"+Date.now(),
-    name:evName.value,
-    category:evCategory.value,
-    start:evStart.value,
-    end:evEnd.value,
-    budget:+evBudget.value,
-    transactions:[]
-  });
-  localStorage.setItem("events",JSON.stringify(events));
+function toggleEventPopup() {
+  const fab = document.getElementById('fabBtn');
+  const popup = document.getElementById('eventPopup');
   
-  evName.value = "";
-  evCategory.value = "";
-  evStart.value = "";
-  evEnd.value = "";
-  evBudget.value = "";
-
-  eventPopup.style.display="none";
-  renderEventList();
-}
-
-function hideEventPopup(){
-  eventPopup.style.display = "none";
+  if (popup.style.display === 'flex') {
+    fab.classList.remove('close');
+    popup.style.display = 'none';
+  } else {
+    fab.classList.add('close');
+    popup.style.display = 'flex';
+  }
 }
 
 function hideTransPopup(){
   transPopup.style.display = "none";
+  document.getElementById('fabBtn').classList.remove('close');
 }
 
 // Close when clicking outside popup
 function closeEventPopup(e){
   if(e.target.id === "eventPopup"){
-    hideEventPopup();
+    document.getElementById('fabBtn').classList.remove('close');
+    document.getElementById('eventPopup').style.display = 'none';
   }
 }
 
@@ -758,6 +751,8 @@ function logout(){
   location.href = "index.html";
 }
 </script>
+
+
 
 </body>
 </html>

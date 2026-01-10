@@ -19,7 +19,7 @@
         position: sticky;
         top: 0;
         z-index: 10;
-        background: #375534;
+        background: #9bbd3b;
         padding: 1rem;
         box-shadow: 0 2px 4px #0000001a;
         border-bottom-left-radius: 20px;
@@ -45,7 +45,7 @@
         color: #46b446;
     }
     .transaction-item.expense {
-        color: #aa0606;
+        color: #df6c01;
     }
 
      .title {
@@ -63,7 +63,7 @@
         width: 60px;
         height: 60px;
         border-radius: 50%;
-        background: #375534;
+        background: #9bbd3b;
         color: white;
         font-size: 2rem;
         display: flex;
@@ -135,7 +135,7 @@
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background: #375534;
+    background: #9bbd3b;
     color: #ffffff;
     font-size: 2rem;
     display: flex;
@@ -162,7 +162,7 @@
         display: flex;
         justify-content: space-around;
         align-items: center;
-        background: #375534;
+        background: #9bbd3b;
         backdrop-filter: blur(10px);
         box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
         z-index: 11;
@@ -288,12 +288,12 @@
     .type-btn:last-child { border-top-right-radius: 50px; border-bottom-right-radius: 50px; }
 
     .type-btn[data-type="income"] { border-color: #46b446; color: #46b446; }
-    .type-btn[data-type="expense"] { border-color: #aa0606; color: #aa0606; }
+    .type-btn[data-type="expense"] { border-color: #df6c01; color: #df6c01; }
     .type-btn[data-type="transfer"] { border-color: #1e90ff; color: #1e90ff; }
 
 /* Transaction Type Button Active Colors */
     .type-btn.active[data-type="income"] { background-color: #46b446; color: #fff; }
-    .type-btn.active[data-type="expense"] { background-color: #aa0606; color: #fff; }
+    .type-btn.active[data-type="expense"] { background-color: #df6c01; color: #fff; }
     .type-btn.active[data-type="transfer"] { background-color: #1e90ff; color: #fff; }
 
 /*ledger*/
@@ -312,8 +312,7 @@
     display: grid;
     grid-template-columns: 1.2fr 1fr 1fr;
     align-items: center;
-    background: 
-    #506856;
+    background: #9bbd3b;
     padding: 8px 10px;
     border-radius: 10px 10px 0 0;
     font-size: 14px;
@@ -345,7 +344,7 @@
 
 .ledger-expense {
     text-align: left;
-    color: #aa0606;
+    color: #df6c01;
     padding-left: 6px;
 }
 
@@ -369,7 +368,7 @@
 
 .ledger-expense {
     text-align: left;
-    color: #aa0606;
+    color: #df6c01;
 }
 
 
@@ -414,24 +413,15 @@
 
 <!-- Top Card -->
 <div class="top-card">
-
-    <div class="d-flex justify-content-between align-items-center mb-2">
-        <button 
-            class="btn btn-sm btn-outline-light"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#sidePanel">
-            &#9776;
-        </button>
-        <h6 class="m-0 text-center flex-grow-1">TRANSACTIONS</h6>
-        <div style="width:32px"></div>
-    </div>
-
-   
-    <div class="text-center mt-2">
-        <p class="mb-0">Total Incomes: 0.00 LKR</p>
-        <p class="mb-0">Total Expenses: 0.00 LKR</p>
-    </div>
-
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <button class="btn btn-sm btn-outline-light" data-bs-toggle="offcanvas" data-bs-target="#sidePanel">&#9776;</button>
+    <h5 class="m-0 flex-grow-1 text-center title">TRANSACTIONS</h5>  <!-- Fixed! -->
+    <div style="width:32px"></div>
+  </div>
+  <div class="text-center mt-2">
+    <p class="mb-0">Total Incomes: 0.00 LKR</p>
+    <p class="mb-0">Total Expenses: 0.00 LKR</p>
+  </div>
 </div>
 
   
@@ -450,7 +440,7 @@
     <button class="active" >
         <img src="assets\Icons\Bottom Nav Bar\trans.png" style="background-color: transparent;" width="24">
     </button>
-    <button >
+    <button onclick="location.href='events.html'">
         <img src="assets\Icons\Bottom Nav Bar\event.png" style="background-color: transparent;" width="24">
     </button>
    <button onclick="location.href='accounts.html'">

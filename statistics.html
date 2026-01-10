@@ -19,7 +19,7 @@ body {
 
 /* ===== TOP BAR ===== */
 .topbar {
-  background: #ffffff;
+  background: #9bbd3b;
   padding: 15px;
   display: flex;
   align-items: center;
@@ -44,6 +44,7 @@ body {
   text-align: center;
   font-weight: bold;
   font-size: 20px;
+  color: #ffffff;
 }
 
 /* ===== CONTENT ===== */
@@ -61,40 +62,47 @@ body {
 }
 
 /* ===== BOTTOM NAV ===== */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 65px;
-  background: #375534;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  border-top-left-radius: 20px;
-  border-top-right-radius: 20px;
-}
+  .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 60px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        background: #9bbd3b;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+        z-index: 11;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
 
-.bottom-nav button {
-  background: none;
-  border: none;
-  position: relative;
-}
 
-.bottom-nav button.active::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: #fff;
-  border-radius: 2px;
-}
+  .bottom-nav button {
+        background: transparent;
+        border: none;
+        padding: 6px;
+        position: relative;
+    }
+
+ .bottom-nav button.active::after {
+        content: '';
+        position: absolute     ;
+        bottom: -5px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: #ffffff;
+        border-radius: 2px;
+        animation: slideIn 0.3s ease forwards;
+    }
+
 
 .bottom-nav img {
-  width: 26px;
-}
-
+        filter: brightness(0) invert(1);
+        width: 24px;
+    }
 
 .list-group-item {
   border: none !important;
@@ -103,18 +111,22 @@ body {
 }
 
 /* Make sidebar buttons look like plain text rows */
-.sidebar-btn {
-  border: none;
-  background: transparent;
-  text-align: left;
-  padding: 14px 20px;
-  font-size: 16px;
-}
+  .sidebar-btn {
+        background: transparent;
+        border: none;
+        padding: 0.5rem 0;
+        text-align: left;
+        font-size: 1rem;
+        cursor: pointer;
+        color: inherit;
+        width: 100%;
+    }
 
 /* Hover effect (optional but recommended) */
 .sidebar-btn:hover {
-  background: #f2f2f2;
-}
+        background: #e6e6e6;
+    }
+
 
 </style>
 </head>
@@ -123,40 +135,31 @@ body {
 
 <!-- ===== TOP BAR ===== -->
 <div class="topbar">
-  <button class="menu-btn" data-bs-toggle="offcanvas" data-bs-target="#sidePanel">☰</button>
+  <button class="btn btn-sm btn-outline-light" data-bs-toggle="offcanvas" data-bs-target="#sidePanel">☰</button>
   <div class="top-title">STATISTICS</div>
 </div>
 
-<!-- Side Panel -->
+
+<!-- Side Panel  -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="sidePanel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">Menu</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
   </div>
-
   <div class="offcanvas-body d-flex flex-column justify-content-between p-0">
-    <!-- list of items  -->
     <ul class="list-group list-group-flush">
-  <li class="list-group-item">
-    <button class="sidebar-btn w-100" onclick="goToPage('daily tansactions dashboard.html')">Dashboard</button>
-  </li>
-  <li class="list-group-item">
-    <button class="sidebar-btn w-100" onclick="goToPage('profile.html')">Profile</button>
-  </li>
-  <li class="list-group-item">
-    <button class="sidebar-btn w-100" onclick="goToPage('change-password.html')">Change Password</button>
-  </li>
-  <li class="list-group-item">
-    <button class="sidebar-btn w-100" onclick="goToPage('settings.html')">Settings</button>
-  </li>
-</ul>
-
-    <!-- Logout at Bottom -->
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('daily tansactions dashboard.html')">Dashboard</button></li>
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('profile.html')">Profile</button></li>  
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('change-password.html')">Change Password</button></li> 
+      <li class="list-group-item"><button class="sidebar-btn w-100" onclick="goToPage('settings.html')">Settings</button></li> 
+    </ul>
     <div class="p-3">
-      <button class="btn w-100 btn-outline-danger logout-btn"onclick="goToPage('index.html')">Logout</button>
+      <button class="btn w-100 btn-outline-danger logout-btn" onclick="goToPage('index.html')">Logout</button>
     </div>
   </div>
 </div>
+
+
 
 <!-- ===== CONTENT ===== -->
 <div class="container">
