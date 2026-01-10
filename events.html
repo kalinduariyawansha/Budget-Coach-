@@ -227,6 +227,41 @@ body{
   font-size:14px;
 }
 
+.add-event-btn {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #9bbd3b;
+  color: #fff;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px #00000033;
+  cursor: pointer;
+  border: none;
+  z-index: 30;
+}
+
+.add-event-btn.close {
+  background: #ff0000 !important;
+  transform: rotate(45deg) scale(1.1);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.btn-outline-warning {
+  color: #df6c01 !important;
+  border-color: #df6c01 !important;
+}
+.btn-outline-warning.active {
+  background-color: #df6c01 !important;
+  color: white !important;
+}
+
+
 .ledger-income{
   color:#008000;
   text-align:left;
@@ -364,7 +399,8 @@ body{
   <div id="eventLedger"></div>
 </div>
 
-  <button class="add-event-btn" id="addEventBtn">+</button>
+  <button class="add-event-btn" id="addEventBtn" onclick="toggleTransPopup()">+</button>
+
 </div>
 
 <!-- ================= CREATE EVENT POPUP ================= -->
@@ -385,7 +421,8 @@ body{
     </div>
 
     <input type="number" class="form-control mb-3" id="evBudget" placeholder="Initial Budget (LKR)">
-    <button class="btn btn-success w-100" onclick="saveEvent()">SAVE</button>
+    <button class="btn btn-success w-100" onclick="document.saveEventData()">SAVE</button>
+
 
   </div>
 </div>
@@ -402,11 +439,11 @@ body{
               onclick="selectType('income')">
         Income
       </button>
-      <button class="btn btn-outline-danger"
+      <button class="btn btn-outline-warning"
               id="btnExpense"
               onclick="selectType('expense')">
         Expense
-      </button>
+</button>
     </div>
 
   
@@ -437,7 +474,7 @@ body{
       SAVE
     </button>
 
-    <button class="close-btn" onclick="hideTransPopup()">CANCEL</button>
+   
   </div>
 </div>
 
@@ -573,11 +610,7 @@ function closeEventPopup(e){
   }
 }
 
-function closeTransPopup(e){
-  if(e.target.id === "transPopup"){
-    hideTransPopup();
-  }
-}
+
 
 
 /* ---------------- EVENT DETAILS ---------------- */
@@ -591,8 +624,10 @@ function openEvent(id){
 function backToList(){
   eventDetailsScreen.style.display="none";
   eventListScreen.style.display="block";
+  document.getElementById('addEventBtn').classList.remove('close');
   renderEventList();
 }
+
 
 /* ---------------- TRANSACTIONS ---------------- */
 function openTransactionPopup(){
@@ -630,6 +665,7 @@ function addTransaction(){
 
   hideTransPopup();
   renderEventDetails();
+  document.getElementById('addEventBtn').classList.remove('close');
   renderEventList();
 }
 
@@ -700,9 +736,24 @@ function renderEventDetails(){
 
   detailPercent.innerText = `${percent.toFixed(0)}% used`;
 
-  let remaining = activeEvent.budget - expense;
-  eventBalance.innerText = "LKR " + remaining.toLocaleString();
+  let remaining = activeEvent.budget + income - expense;
+eventBalance.innerText = "LKR " + remaining.toLocaleString();
+
 }
+
+function toggleTransPopup() {
+  const btn = document.getElementById('addEventBtn');
+  const popup = document.getElementById('transPopup');
+  
+  if (popup.style.display === 'flex') {
+    btn.classList.remove('close');
+    popup.style.display = 'none';
+  } else {
+    btn.classList.add('close');
+    popup.style.display = 'flex';
+  }
+}
+
 
 /* ---------------- INIT ---------------- */
 eventDetailsScreen.style.display = "none";
@@ -750,6 +801,45 @@ function logout(){
   sessionStorage.removeItem("loggedIn");
   location.href = "index.html";
 }
+
+// SAVE EVENT (fixes SAVE button)
+document.saveEventData = function(){
+  const name = document.getElementById('evName').value.trim();
+  if(!name || !document.getElementById('evStart').value || 
+     !document.getElementById('evEnd').value || 
+     document.getElementById('evBudget').value === ''){
+    alert("Fill: Name, dates, budget");
+    return;
+  }
+  events.push({
+    id:"evt_"+Date.now(),
+    name:name,
+    category:document.getElementById('evCategory').value||"",
+    start:document.getElementById('evStart').value,
+    end:document.getElementById('evEnd').value,
+    budget:+document.getElementById('evBudget').value,
+    transactions:[]
+  });
+  localStorage.setItem("events",JSON.stringify(events));
+  // Clear + close
+  ['evName','evCategory','evStart','evEnd','evBudget'].forEach(id=>document.getElementById(id).value="");
+  document.getElementById('eventPopup').style.display='none';
+  document.getElementById('fabBtn').classList.remove('close');
+  renderEventList();
+}
+
+// DELETE EVENT (fixes trash button)
+function deleteEvent(id, ev){
+  ev.stopPropagation(); // prevents opening event when clicking trash
+  if(!confirm("Delete '"+events.find(e=>e.id===id)?.name+"'?")){
+    return;
+  }
+  events = events.filter(e=>e.id!==id);
+  localStorage.setItem("events",JSON.stringify(events));
+  renderEventList();
+}
+
+
 </script>
 
 
